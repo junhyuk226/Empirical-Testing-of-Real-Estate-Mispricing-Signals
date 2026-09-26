@@ -103,3 +103,193 @@ Results:
 6. Baseline valuation model
 7. Mispricing signal construction
 8. Walk-forward validation
+
+
+# Research Log — 2026-09-26
+
+## Project
+
+**Empirical Testing of Real Estate Mispricing Signals**
+
+## Research Area
+
+Nowon-gu, Seoul
+
+---
+
+## Today's Work
+
+### 1. Historical Data Expansion
+
+Expanded the transaction dataset from the initial one-year sample to historical data covering approximately 2018–2026.
+
+The purpose was to support:
+
+* historical decision-date construction
+* multiple future-return horizons
+* walk-forward validation
+* testing across different market regimes
+
+---
+
+### 2. Master Transaction Dataset
+
+Combined the uploaded Nowon-gu apartment transaction datasets while preserving the original source files.
+
+Raw observations:
+
+**50,161**
+
+After collapsing exact cross-file redundancies:
+
+**48,539**
+
+Valid transaction observations:
+
+**47,238**
+
+Cancelled/released observations:
+
+**1,301**
+
+The cross-file overlap was primarily caused by overlapping historical and recent data extracts.
+
+Exact cross-file duplicates were collapsed.
+
+Potential duplicate records occurring within a single source file were not automatically deleted and remain flagged for further review.
+
+---
+
+### 3. Entity Identification
+
+Constructed the provisional complex identifier:
+
+`complex_id_v1`
+
+based on:
+
+* administrative district
+* lot main number
+* lot sub-number
+* complex name
+* construction year
+
+Current master dataset:
+
+* Complex names: 317
+* Provisional complex IDs: 332
+* Complex × Exact Area groups: 1,158
+
+Transaction frequency:
+
+* Median: 16 transactions/group
+* Mean: 40.79 transactions/group
+* Maximum: 697 transactions/group
+
+The Complex × Exact Area unit will be used as the primary research unit because persistent individual-unit identifiers are not available in the source data.
+
+---
+
+### 4. Historical Snapshot Protocol
+
+Defined a baseline monthly month-end decision-date framework.
+
+The research distinguishes:
+
+1. transaction date
+2. reporting date
+3. public availability date
+4. decision date
+
+Because complete historical publication timestamps are not currently available, a conservative transaction information cutoff is used:
+
+`transaction_date <= decision_date - 31 days`
+
+This is an approximation designed to reduce look-ahead bias rather than a reconstruction of exact historical publication timestamps.
+
+---
+
+### 5. Benchmark Design
+
+Primary benchmark:
+
+**Korea Real Estate Board — Apartment Sale Price Index — Nowon-gu**
+
+Secondary robustness benchmark:
+
+**Korea Real Estate Board — Apartment Transaction Price Index — Seoul Northeast living zone**
+
+Benchmark publication timing will be considered separately from benchmark reference periods.
+
+---
+
+### 6. Future Return Design
+
+Defined candidate future horizons:
+
+* 3M
+* 6M
+* 12M
+* 24M
+* 36M
+
+Future transactions will be matched using a predefined:
+
+**±45-day target-date window**
+
+The closest transaction date within the window will be used.
+
+Same-date multiple transactions will be aggregated using the median.
+
+No future transaction will be artificially imputed.
+
+---
+
+### 7. Outcome Variable
+
+The primary outcome is:
+
+**Benchmark-relative excess return**
+
+`Excess Return = Complex × Area Price Return - Nowon-gu Benchmark Return`
+
+The project therefore distinguishes:
+
+* absolute price appreciation
+* benchmark-relative excess return
+* transaction-cost-adjusted investability
+
+These should not be treated as equivalent concepts.
+
+---
+
+## Research Status
+
+Completed:
+
+* Research question refinement
+* Data dictionary
+* Initial data audit
+* Historical data acquisition
+* Master transaction dataset v1
+* Historical snapshot protocol v1
+* Future return protocol v1
+
+Next:
+
+**Historical Snapshot Panel v1**
+
+The next stage will construct the information set available at each historical decision date and determine the feasible baseline price estimator for each Complex × Exact Area group.
+
+---
+
+## Research Principle
+
+Raw data are preserved.
+
+Ambiguous observations are flagged rather than silently deleted.
+
+Historical information must be separated from future outcomes.
+
+Model performance will be evaluated using walk-forward validation rather than random train/test splitting.
+
