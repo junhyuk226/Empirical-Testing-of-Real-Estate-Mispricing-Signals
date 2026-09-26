@@ -1,0 +1,77 @@
+Data Dictionary v1.1
+
+## Purpose
+
+This document defines the standardized variables used in the real estate mispricing research pipeline.
+
+Raw source fields are preserved separately from standardized and derived variables.
+
+## Core Variables
+
+| Source Field | Standard Variable       | Type        | Processing                       |
+| ------------ | ----------------------- | ----------- | -------------------------------- |
+| 거래금액(만원)     | `transaction_price_krw` | Integer     | Multiply source value by 10,000  |
+| 전용면적(㎡)      | `exclusive_area_m2`     | Float       | Retain in square meters          |
+| 계약년월 + 계약일   | `transaction_date`      | Date        | Combine into YYYY-MM-DD          |
+| 건축년도         | `building_year`         | Integer     | Retain source value              |
+| 층            | `floor`                 | Integer     | Retain source value              |
+| 시군구          | `district_address_raw`  | String      | Preserve raw value               |
+| 번지           | `lot_address_raw`       | String      | Preserve raw value               |
+| 본번           | `lot_main_no`           | String      | Standardize as address component |
+| 부번           | `lot_sub_no`            | String      | Standardize as address component |
+| 단지명          | `complex_name_raw`      | String      | Preserve raw complex name        |
+| 동            | `building_no_raw`       | String      | Preserve raw building/dong value |
+| NO           | `source_row_id`         | Integer     | Source provenance only           |
+| 해제사유발생일      | `cancellation_date`     | Date/String | Used for cancellation status     |
+
+## Derived Variables
+
+The following variables are derived during data processing:
+
+* `complex_id_v1`
+* `transaction_id`
+* `transaction_status`
+* `duplicate_candidate`
+* `duplicate_status`
+
+## Identity Hierarchy
+
+The current data model distinguishes:
+
+```text
+Complex
+   ↓
+Building / Dong
+   ↓
+Exclusive Area / Unit Type
+   ↓
+Transaction
+   ↓
+Source Row
+```
+
+Definitions:
+
+* `complex_id_v1`: provisional identifier for an apartment complex
+* `building_no_raw`: building/dong identifier within a complex
+* `exclusive_area_m2`: exclusive residential floor area
+* `transaction_id`: identifier for an individual transaction
+* `source_row_id`: provenance identifier from the source dataset
+
+`source_row_id` should not be treated as a permanent transaction identifier across different data downloads or source versions.
+
+## Data Layer Principle
+
+The research pipeline separates:
+
+```text
+RAW_DATA
+   ↓
+CLEAN_DATA
+   ↓
+FEATURE_DATA
+   ↓
+MODEL_DATA
+```
+
+Raw source data should remain unchanged. Transformations and research assumptions should be documented in downstream layers.
