@@ -1,0 +1,106 @@
+docs/research_log.md
+# Research Log
+
+## 2026-09-24
+
+### Research Question Revision
+
+The project scope was revised from a general apartment fair-value prediction system toward an empirical test of real estate mispricing signals.
+
+The central research question is:
+
+> Given information observable at a historical decision date, can we estimate a conditional value for an apartment, identify potential mispricing, and test whether the resulting signal is associated with future benchmark-relative excess returns?
+
+The project does not assume that a more accurate price prediction model automatically produces a profitable investment strategy.
+
+### Data Acquisition
+
+Initial transaction-level apartment sales data were acquired for Nowon-gu, Seoul.
+
+Observation period:
+
+* 2025-09-24 to 2026-09-24
+
+Raw observations:
+
+* 7,689
+
+### Data Standardization
+
+A preliminary data dictionary was established to convert source-specific Korean field names into standardized research variables.
+
+Key standardized variables include:
+
+* `transaction_price_krw`
+* `exclusive_area_m2`
+* `transaction_date`
+* `building_year`
+* `floor`
+* `complex_name_raw`
+* `building_no_raw`
+* `cancellation_date`
+* `source_row_id`
+
+Raw source fields are preserved separately from derived research variables.
+
+### Transaction Audit
+
+Audit v2 identified:
+
+* Raw observations: 7,689
+* Cancelled observations: 179
+* Normal transaction candidates: 7,510
+* Cancellation rate: 2.33%
+* Exact duplicate rows: 0
+* Duplicate candidate records: 64 across 24 candidate groups
+
+Ambiguous duplicate candidates were not automatically deleted because repeated transactions with similar characteristics may represent legitimate separate transactions.
+
+### Complex Identification
+
+A provisional complex identifier was constructed using:
+
+```text
+시군구 + 본번 + 부번 + 단지명 + 건축년도
+```
+
+Results:
+
+* Complex names: 266
+* Provisional complex IDs: 278
+
+This identifier is provisional and is not treated as a final canonical property master ID.
+
+### Modeling Unit
+
+The initial modeling unit was evaluated as:
+
+```text
+Complex × Exact Exclusive Area
+```
+
+Results:
+
+* Groups: 790
+* Median transactions per group: 6
+* Mean transactions per group: 9.51
+* Maximum transactions per group: 113
+
+### Research Principles Established
+
+* Raw data should be preserved.
+* Cancelled transactions should remain in the raw layer and be explicitly classified.
+* Ambiguous duplicate candidates should be flagged rather than silently removed.
+* Historical information available at each decision date must be respected.
+* Look-ahead bias must be explicitly controlled.
+
+### Next Steps
+
+1. Historical data acquisition
+2. Historical information/snapshot protocol
+3. Decision-date construction
+4. Future-return calculation
+5. Benchmark construction
+6. Baseline valuation model
+7. Mispricing signal construction
+8. Walk-forward validation
