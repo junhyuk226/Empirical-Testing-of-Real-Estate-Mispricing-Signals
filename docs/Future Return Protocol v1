@@ -1,0 +1,389 @@
+# Future Return Protocol v1
+
+## Purpose
+
+This protocol defines how future apartment price performance is measured after a historical decision date.
+
+The objective is to test whether apartment-level undervaluation signals are associated with subsequent benchmark-relative price performance.
+
+The outcome variable is therefore future **benchmark-relative excess return**, not simply future absolute price appreciation.
+
+---
+
+## 1. Research Unit
+
+The primary research unit is:
+
+> Complex × Exact Exclusive Area
+
+Example:
+
+* Complex A
+* 84.97 m²
+
+This unit is used because the available transaction data do not provide a persistent individual-unit identifier.
+
+Individual apartment-level realized returns are therefore not directly observable.
+
+---
+
+## 2. Decision Date
+
+For the baseline panel specification, decision dates occur at monthly month-end.
+
+Example:
+
+* 2023-01-31
+* 2023-02-28
+* 2023-03-31
+
+At each decision date `t`, the research system constructs the information set using only information that would have been available by that date under the Historical Data Snapshot Protocol.
+
+---
+
+## 3. Baseline Price at Decision Date
+
+For each Complex × Exact Area group, the baseline market price is calculated from eligible historical transactions available at the decision date.
+
+The baseline specification will use the most recent sufficiently populated transaction window rather than relying on a single transaction whenever possible.
+
+Candidate aggregation methods include:
+
+1. recent transaction median
+2. recent transaction mean
+3. exponentially weighted recent transaction price
+
+The primary specification will be selected after examining transaction frequency and robustness.
+
+The selected baseline price is denoted:
+
+`P_i,t`
+
+where:
+
+* `i` = Complex × Exact Area
+* `t` = decision date
+
+---
+
+## 4. Future Price
+
+Future performance is measured using subsequent observed transaction prices for the same Complex × Exact Area group.
+
+For horizon `h`:
+
+* 3 months
+* 6 months
+* 12 months
+* 24 months
+* 36 months
+
+the future reference price is denoted:
+
+`P_i,t+h`
+
+Because transactions do not occur on every day or exactly at every horizon, the research dataset will define a permissible observation window around the target horizon.
+
+The exact tolerance window will be determined after examining transaction frequency.
+
+---
+
+## 5. Future Price Return
+
+The raw future price return is:
+
+`R_i,t,h = (P_i,t+h / P_i,t) - 1`
+
+where:
+
+* `P_i,t` = baseline price at decision date
+* `P_i,t+h` = future price at the target horizon
+* `h` = investment horizon
+
+This represents the change in the market transaction price of the same Complex × Exact Area category.
+
+It should not be interpreted as the realized return of a specific individual apartment unit.
+
+---
+
+## 6. Benchmark Return
+
+The primary benchmark is the Korea Real Estate Board's monthly Apartment Sale Price Index for Nowon-gu.
+
+For the same horizon:
+
+`R_B,t,h = (I_t+h / I_t) - 1`
+
+where:
+
+* `I_t` = benchmark index at the beginning of the horizon
+* `I_t+h` = benchmark index at the end of the horizon
+
+Benchmark observations must also satisfy the historical information-availability rules defined in the Snapshot Protocol.
+
+The Korea Real Estate Board publishes the National Survey of House Price Trends monthly, generally on the 15th of the following month. Therefore, benchmark publication timing must be distinguished from the benchmark's reference month.
+
+---
+
+## 7. Benchmark-Relative Excess Return
+
+The primary outcome variable is:
+
+`ExcessReturn_i,t,h = R_i,t,h - R_B,t,h`
+
+Therefore:
+
+`ExcessReturn_i,t,h`
+`= (P_i,t+h / P_i,t - 1)`
+`- (I_t+h / I_t - 1)`
+
+Interpretation:
+
+* Positive value: the Complex × Exact Area price increased more than the Nowon-gu benchmark over the same period.
+* Zero: performance approximately matched the benchmark.
+* Negative value: performance was below the benchmark.
+
+This is a relative-performance measure, not a causal estimate.
+
+---
+
+## 8. Log-Return Robustness Specification
+
+A logarithmic specification may be used as a robustness test:
+
+`LogExcessReturn_i,t,h`
+
+`= ln(P_i,t+h / P_i,t)`
+`- ln(I_t+h / I_t)`
+
+The primary reporting specification will use simple returns because they are easier to interpret economically.
+
+Log returns may be used for regression robustness.
+
+---
+
+## 9. Missing Future Transactions
+
+A Complex × Exact Area observation may have no transaction near the target horizon.
+
+The research system will not silently impute a future transaction price.
+
+Possible outcome states include:
+
+* `observed`
+* `no_future_transaction`
+* `insufficient_window_observations`
+* `invalid_or_cancelled`
+* `excluded_by_data_rule`
+
+The initial analysis will report the proportion of observations with measurable future outcomes.
+
+---
+
+## 10. Horizon Matching
+
+For each target horizon `h`, the system will search for future transaction observations around:
+
+`t + h`
+
+rather than requiring an exact calendar-day transaction.
+
+For example:
+
+Target:
+
+`t + 12 months`
+
+Observed transaction:
+
+`t + 11.7 months`
+
+may qualify if it falls within the predefined tolerance window.
+
+The tolerance window must be defined before inspecting performance results in order to reduce researcher degrees of freedom.
+
+---
+
+## 11. Transaction Aggregation
+
+Because multiple transactions may occur within the future observation window, the primary future price estimator will use the median transaction price for the Complex × Exact Area group.
+
+The median is preferred for the primary specification because apartment transaction prices can contain substantial dispersion from:
+
+* floor
+* building position
+* transaction-specific characteristics
+* atypical transactions
+* small sample sizes
+
+Alternative aggregation methods may be tested as robustness specifications.
+
+---
+
+## 12. Transaction Costs
+
+The baseline excess-return measure is a **gross price-return measure**.
+
+It does not initially incorporate:
+
+* acquisition tax
+* brokerage fees
+* disposal costs
+* financing costs
+* holding costs
+* taxes
+* renovation costs
+
+Transaction-cost-adjusted performance may be introduced later as an economic-feasibility analysis.
+
+This distinction is important because statistical predictability and actual investability are different questions.
+
+---
+
+## 13. Liquidity
+
+Liquidity will be treated as a separate research dimension.
+
+A signal may have predictive association with future prices while being difficult to realize because a Complex × Exact Area group trades infrequently.
+
+Candidate liquidity variables include:
+
+* transaction count
+* transaction frequency
+* average days between transactions
+* proportion of horizons with an observable future transaction
+
+The research will therefore distinguish:
+
+`Predictive Association`
+
+from
+
+`Realizable Investment Performance`
+
+---
+
+## 14. Primary and Secondary Horizons
+
+Candidate horizons:
+
+* 3M
+* 6M
+* 12M
+* 24M
+* 36M
+
+The final primary horizon will not be selected based on which horizon produces the strongest result.
+
+The primary specification will be determined using research-design considerations such as:
+
+* sample availability
+* economic relevance
+* sufficient future observations
+* consistency with the research question
+
+Other horizons will be reported as secondary outcomes.
+
+---
+
+## 15. Secondary Benchmark
+
+A robustness analysis may use the Korea Real Estate Board's Apartment Actual Transaction Price Index for the Seoul Northeast living zone.
+
+This index is based on reported apartment transaction data and uses a repeat-sales methodology. Its geographical unit is broader than Nowon-gu, so it should not be treated as a Nowon-gu-specific benchmark.
+
+---
+
+## 16. Interpretation
+
+A positive future excess return associated with higher historical undervaluation would be interpreted as evidence consistent with the hypothesis that the historical undervaluation signal contains predictive information about subsequent relative price performance.
+
+It would not by itself establish:
+
+* causality
+* market inefficiency
+* guaranteed investment profitability
+* risk-adjusted alpha
+* investability after all transaction costs
+
+Additional robustness tests are required for stronger interpretations.
+
+---
+
+## 17. Data Leakage Controls
+
+The following information must not enter the feature set at decision date `t`:
+
+* future transaction prices
+* future transaction counts
+* future benchmark values
+* future cancellations
+* future building or market information
+* any variable derived using observations occurring after the information cutoff
+
+The future outcome is deliberately separated from the historical information set.
+
+---
+
+## 18. Core Research Dataset Structure
+
+The eventual panel dataset should contain approximately:
+
+| Field                       | Description                       |
+| --------------------------- | --------------------------------- |
+| `decision_date`             | Historical information cutoff     |
+| `complex_id`                | Apartment complex                 |
+| `exclusive_area_m2`         | Exact area                        |
+| `baseline_price`            | Historical reference price        |
+| `conditional_price`         | Model-estimated conditional price |
+| `undervaluation_rate`       | Mispricing signal                 |
+| `horizon_months`            | 3 / 6 / 12 / 24 / 36              |
+| `future_price`              | Future reference price            |
+| `asset_return`              | Future price return               |
+| `benchmark_return`          | Nowon-gu benchmark return         |
+| `excess_return`             | Benchmark-relative return         |
+| `future_observation_status` | Outcome availability status       |
+| `transaction_count_history` | Historical liquidity measure      |
+
+---
+
+## 19. Core Hypothesis
+
+The primary empirical hypothesis is:
+
+> Higher historical undervaluation is associated with higher subsequent benchmark-relative excess returns.
+
+Formally:
+
+`ExcessReturn_i,t,h = α + β Undervaluation_i,t + Controls_i,t + ε_i,t,h`
+
+The key coefficient is:
+
+`β`
+
+A positive estimated `β` would be consistent with the hypothesis.
+
+The analysis must account for repeated observations across:
+
+* complexes
+* areas
+* decision dates
+* investment horizons
+
+and should therefore consider appropriate clustered or panel inference methods.
+
+---
+
+## 20. Research Principle
+
+The future return variable must be constructed independently of the historical signal.
+
+The signal answers:
+
+> What did the model believe about the apartment's relative value using information available at time `t`?
+
+The outcome answers:
+
+> What happened to the corresponding Complex × Exact Area price after time `t`?
+
+Keeping these two processes separate is essential for avoiding look-ahead bias.
