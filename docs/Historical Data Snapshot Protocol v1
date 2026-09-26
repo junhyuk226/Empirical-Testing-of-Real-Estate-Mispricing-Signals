@@ -1,0 +1,140 @@
+# Historical Data Snapshot Protocol v1
+
+## Purpose
+
+This protocol defines how historical information is constructed for the empirical testing of real estate mispricing signals.
+
+The primary objective is to prevent look-ahead bias by ensuring that model inputs correspond to information that could reasonably have been available at the historical decision date.
+
+## 1. Decision Date
+
+The baseline research design uses monthly month-end decision dates.
+
+Examples:
+
+* 2023-01-31
+* 2023-02-28
+* 2023-03-31
+
+The monthly design provides a consistent panel structure for comparing apartment-level signals across time.
+
+Transaction/event-based decision dates may be evaluated later as a robustness specification.
+
+## 2. Transaction Timing
+
+The following dates are conceptually distinguished:
+
+* `transaction_date`: date on which the transaction contract was concluded.
+* `reported_date`: date on which the transaction was reported to the relevant authority.
+* `publication_date`: date on which the reported transaction became publicly available.
+* `cancellation_date`: date associated with cancellation/release of the reported transaction.
+
+The transaction date and information-availability date must not be treated as automatically identical.
+
+## 3. Current Data Limitation
+
+The currently acquired transaction dataset contains transaction dates and cancellation information but does not provide a complete historical record of the exact public availability timestamp for each transaction.
+
+Therefore, the exact historical information set cannot yet be reconstructed from the current dataset alone.
+
+## 4. Conservative Information Cutoff
+
+Until historical publication timestamps or archived snapshots are obtained, the baseline specification will use a conservative transaction-information cutoff.
+
+For decision date `t`:
+
+```text
+Eligible transaction information:
+transaction_date <= t - 31 days
+```
+
+The 31-day buffer is intended to account conservatively for the legally permitted reporting window of up to 30 days and the normal publication process.
+
+This is a conservative approximation rather than a reconstruction of the exact historical publication timestamp.
+
+## 5. Benchmark Information Timing
+
+The primary benchmark is the Korea Real Estate Board's monthly apartment sale price index for Nowon-gu.
+
+The benchmark is subject to its own publication lag. Monthly National Housing Price Trend Survey data are published around the 15th of the following month.
+
+Therefore, a benchmark observation may only enter the information set if it had been published by the decision date.
+
+Example:
+
+```text
+Decision date: 2023-01-31
+
+January 2023 benchmark:
+Not yet available
+
+Latest eligible benchmark:
+December 2022
+```
+
+## 6. Primary Benchmark
+
+Primary benchmark:
+
+```text
+Korea Real Estate Board
+National Housing Price Trend Survey
+Apartment Sale Price Index
+Nowon-gu
+Monthly frequency
+```
+
+The benchmark is intended to measure the broader apartment-market movement against which apartment-level future performance can be evaluated.
+
+## 7. Secondary Benchmark
+
+A secondary robustness benchmark may use the Korea Real Estate Board's Apartment Transaction Price Index for the Seoul Northeast living zone.
+
+The Northeast zone includes Nowon-gu and surrounding districts.
+
+This benchmark is based on actual reported transaction prices and provides a transaction-based alternative to the primary appraisal/survey-based price index.
+
+## 8. Information Set Definition
+
+For each decision date `t`:
+
+```text
+InformationSet(t)
+=
+All research inputs that satisfy the historical availability rule at t
+```
+
+No variable may be used merely because its reference period precedes `t`.
+
+Its publication or availability date must also satisfy the information cutoff.
+
+## 9. Future Return Horizons
+
+Candidate future-performance horizons are:
+
+* 3 months
+* 6 months
+* 12 months
+* 24 months
+* 36 months
+
+The final primary and secondary horizons will be determined after historical data availability and sample-size analysis.
+
+## 10. Research Principle
+
+The project distinguishes between:
+
+1. when an economic event occurred,
+2. when the event was reported,
+3. when information became publicly available,
+4. when the research decision was made.
+
+This distinction is required to reduce look-ahead bias in historical backtesting.
+
+## 11. Planned Revision
+
+Version 1 uses a conservative information cutoff because complete historical publication timestamps are not currently available.
+
+If archived data snapshots or reliable publication timestamps are obtained, the protocol will be revised to use the actual point-in-time information set.
+
+Revision history will be documented in the research log.
